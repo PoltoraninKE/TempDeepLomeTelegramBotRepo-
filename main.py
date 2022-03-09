@@ -1,4 +1,6 @@
 from bot import TrashFinderBot
+import requests as r
+print(r.certs.where())
 
 
 def main():
@@ -6,4 +8,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()

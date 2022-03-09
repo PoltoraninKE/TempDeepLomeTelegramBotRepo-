@@ -6,8 +6,8 @@ from message_handler import UserMessageHandler
 
 class TrashFinderBot:
     def __init__(self, bot_token) -> None:
-        self.backend_requester = BackendRequester(url="http://localhost:13424")
-        self.message_handler = UserMessageHandler()
+        self.backend_requester = BackendRequester(url="http://localhost:5094")
+        self.message_handler = UserMessageHandler(self.backend_requester)
 
         # Установка данных бота
         self.bot = Bot(token=bot_token)
@@ -19,7 +19,9 @@ class TrashFinderBot:
 
         # Запуск бота
         self.updater.start_polling()
+        print('bot was started')
         self.updater.idle()
+
 
     def register_handlers(self) -> None:
         self.dispatcher.add_handler(CommandHandler("start", self.on_start))
@@ -39,7 +41,10 @@ class TrashFinderBot:
 
     # Команда "/start"
     def on_start(self, update: Update, context: CallbackContext) -> None:
-        self.healthcheck_API()
+        try:
+            self.healthcheck_API()
+        except Exception as ex:
+            print(ex)
         self.message_handler.start(update)
 
     # Команда "/help"

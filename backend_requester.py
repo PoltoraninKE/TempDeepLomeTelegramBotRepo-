@@ -3,29 +3,35 @@ from telegram import Contact
 
 
 class BackendRequester:
-    def __init__(self, url):
-        self.url: str = url
+    def __init__(self, url: str):
+        self.url = url
+        # Отключил пока не разберусь с SSL
+        self.verify = False
+        self.headers = {'content-type': 'application/json'}
 
     # Зарегистрировать пользователя в базе
-    def register_user(self, contact: Contact) -> bool:
+    def register(self, contact: Contact) -> bool:
+        print("Registering user")
         data = {
-            "Id": None,
+            "Id": 0,
             "FirstName": contact.first_name,
             "LastName": contact.last_name,
             "UserId": contact.user_id,
             "Phone": contact.phone_number,
+            "Events": [
+            ],
             "Trashes": [
             ]
         }
+        print(data)
         try:
-            response = requests.post(self.url + "/bot/new_user", json=data,
-                                     headers={'content-type': 'application/json'})
+            response = requests.post(self.url + "/add_user", json=data,
+                                     headers=self.headers, verify=self.verify)
+            print(response)
             if response.status_code == 200:
-                print(response)
                 return True
             return False
         except Exception as ex:
-            print(response)
             print(ex)
             return False
 
@@ -51,11 +57,12 @@ class BackendRequester:
         print(str(picture_in_bytes))
         print(json.dumps(data))
         r = requests.post("http://localhost:13424/bot/new_user", json=data,
-                          headers={'content-type': 'application/json'})
+                          headers=self.headers, verify=self.verify)
         print(r.status_code)
 
     def healthcheck(self) -> bool:
-        response = requests.get(url=self.url)
+        print(self.url + "/health_check")
+        response = requests.get(url=self.url + "/health_check", verify=self.verify)
         if response.status_code == 200:
             return True
         else:
