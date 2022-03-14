@@ -1,5 +1,6 @@
 import requests
 from telegram import Contact
+import json
 
 
 class BackendRequester:

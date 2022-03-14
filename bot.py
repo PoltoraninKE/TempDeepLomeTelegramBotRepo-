@@ -29,6 +29,7 @@ class TrashFinderBot:
         self.dispatcher.add_handler(CommandHandler("help", self.on_help))
         self.dispatcher.add_handler(CommandHandler("share_phone", self.on_share_phone))
         self.dispatcher.add_handler(CommandHandler("share_location", self.on_share_location))
+        self.dispatcher.add_handler(MessageHandler(Filters.location, self.location))
         self.dispatcher.add_handler(MessageHandler(Filters.contact, self.contact))
         self.dispatcher.add_handler(MessageHandler(Filters.text, self.text))
 
@@ -67,3 +68,6 @@ class TrashFinderBot:
     def text(self, update: Update, context: CallbackContext) -> None:
         self.message_handler.text(update)
 
+    # Когда приходит сообщение с локациейы
+    def location(self, update: Update, context: CallbackContext) -> None:
+        self.message_handler.location(update)
