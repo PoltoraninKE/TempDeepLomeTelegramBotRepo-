@@ -1,4 +1,5 @@
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram.ext import CallbackContext
 
 from backend_requester import BackendRequester
 
@@ -6,6 +7,8 @@ from backend_requester import BackendRequester
 class UserMessageHandler:
     def __init__(self, backend_requester: BackendRequester):
         self.backend_requester = backend_requester
+        self.registered_users = self.get_registered_users()
+        self.path_to_save_file = "D:\\Programmin\\Python\\Telegram_Bots\\TrashFinder_Bot\\TempDeepLomeTelegramBotRepo-\\users_images\\"
 
     # (/start)
     def start(self, update: Update) -> None:
@@ -35,6 +38,7 @@ class UserMessageHandler:
         Мы используем только ту информацию, которую можем вытащить из вашего телеграма, не более.
         """)
         self.share_phone(update)
+        self.registered_users = self.backend_requester.get_registered_users()
 
     def share_location(self, update: Update) -> None:
         my_keyboard = [
@@ -65,10 +69,50 @@ class UserMessageHandler:
                                            "разобрались в проблеме.")
 
     def text(self, update: Update):
-        update.message.reply_text("""
+        print(type(self.registered_users))
+        print(self.registered_users)
+        update.message.reply_text(text="""
                     Извините, я не понял, давайте общаться "командами" :).
                     """)
 
-    def location(self, update: Update):
-        send_str = "Вы поделились вашим местоположением: " + update.message.location.to_json()
-        update.message.reply_text(send_str)
+    def get_trash_info_from_user(self, update: Update):
+        if update.message.contact.phone_number in self.registered_users:
+            self.backend_requester.check_trash_info(update)
+        else:
+            update.message.reply_text(text="""
+            Извините, вы не зарегистрированны в системе,
+            или произошла ошибка, пожалуйста зарегистрируйтесь, или обратитесь к организаторам проекта.
+            """)
+
+    def document_in_message(self, update: Update, context: CallbackContext) -> None:
+        user_chat_id = update.message.chat.id
+        file = update.message.document
+
+        save_file_path = self.path_to_save_file + str(user_chat_id) + '_' + file.file_name + ".jpg"
+
+        # Качаем файл на файловую шару
+        obj = context.bot.get_file(file.file_id)
+        obj.download(
+            custom_path=save_file_path)
+
+        # Отправляем файл на бекенд, если нужный тип, иначе говорим, что что-то пошло не так.
+        if file.mime_type == 'image/jpeg':
+            self.backend_requester.send_photo(obj)
+        else:
+            update.message.reply_text(text="""
+                        Данный тип фото не поддерживается, пожалуйста пришлите его в следующих форматах: 
+                        - jpeg
+                        """)
+
+    def get_user_location(self, update: Update) -> None:
+        user_location_json = update.message.location.to_json()
+        send_str = "Вы поделились вашим местоположением: " + user_location_json
+        update.message.reply_text(text=send_str)
+        self.backend_requester.new_event(user_location_json)
+
+    def photo_in_message(self, update: Update) -> None:
+        update.message.reply_text(text="Пожалуйста, пришлите не сжатое фото, мы не можем обработать сжатое :(")
+
+    #
+    def get_registered_users(self) -> bytes:
+        return self.backend_requester.get_registered_users()

@@ -4,6 +4,7 @@ from telegram.bot import Bot
 from backend_requester import BackendRequester
 from message_handler import UserMessageHandler
 
+
 class TrashFinderBot:
     def __init__(self, bot_token) -> None:
         self.backend_requester = BackendRequester(url="http://localhost:5094")
@@ -22,16 +23,18 @@ class TrashFinderBot:
         print('bot was started')
         self.updater.idle()
 
-
     def register_handlers(self) -> None:
         self.dispatcher.add_handler(CommandHandler("start", self.on_start))
         self.dispatcher.add_handler(CommandHandler("register", self.on_register))
         self.dispatcher.add_handler(CommandHandler("help", self.on_help))
         self.dispatcher.add_handler(CommandHandler("share_phone", self.on_share_phone))
         self.dispatcher.add_handler(CommandHandler("share_location", self.on_share_location))
-        self.dispatcher.add_handler(MessageHandler(Filters.location, self.location))
+        self.dispatcher.add_handler(CommandHandler("share_trash_info", self.get_trash_info))
+        self.dispatcher.add_handler(MessageHandler(Filters.location, self.get_user_location))
         self.dispatcher.add_handler(MessageHandler(Filters.contact, self.contact))
+        self.dispatcher.add_handler(MessageHandler(Filters.photo, self.photo))
         self.dispatcher.add_handler(MessageHandler(Filters.text, self.text))
+        self.dispatcher.add_handler(MessageHandler(Filters.document, self.document))
 
     # Зарегистрировать пользователя в системе
     def on_register(self, update: Update, context: CallbackContext) -> None:
@@ -68,6 +71,16 @@ class TrashFinderBot:
     def text(self, update: Update, context: CallbackContext) -> None:
         self.message_handler.text(update)
 
-    # Когда приходит сообщение с локациейы
-    def location(self, update: Update, context: CallbackContext) -> None:
-        self.message_handler.location(update)
+    # Когда приходит сообщение с локацией
+    def get_user_location(self, update: Update, context: CallbackContext) -> None:
+        self.message_handler.get_user_location(update)
+
+    def get_trash_info(self, update: Update, context: CallbackContext) -> None:
+        self.message_handler.get_trash_info(update)
+
+    def document(self, update: Update, context: CallbackContext) -> None:
+        self.message_handler.document_in_message(update, context)
+
+    def photo(self, update: Update, context: CallbackContext) -> None:
+        self.message_handler.photo_in_message(update)
+

@@ -1,6 +1,9 @@
+import base64
+
 import requests
 from telegram import Contact
 import json
+from telegram import File
 
 
 class BackendRequester:
@@ -69,6 +72,21 @@ class BackendRequester:
         else:
             return False
 
+    def get_registered_users(self):
+        try:
+            response = requests.get(url=self.url + "/get_all_users")
+        except Exception as ex:
+            print(ex)
+        return response.content
+
+    def send_photo(self, file: File):
+        byte_array = file.download_as_bytearray()
+        test = base64.b64encode(byte_array)
+        new_str = test.decode('utf-8')
+
+        requests.post(self.url + "/try_in_photo", json=new_str)
+
     # Зарегистрировать евент в базе
-    def new_event(self):
-        pass
+    def new_event(self, user_location: str):
+        url_add_event = self.url + '/add_event'
+        response = requests.post(url=url_add_event, json=)
