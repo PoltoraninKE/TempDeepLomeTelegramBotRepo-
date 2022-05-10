@@ -64,7 +64,7 @@ class BackendRequester:
                           headers=self.headers, verify=self.verify)
         print(r.status_code)
 
-    def healthcheck(self) -> bool:
+    def health_check(self) -> bool:
         print(self.url + "/health_check")
         response = requests.get(url=self.url + "/health_check", verify=self.verify)
         if response.status_code == 200:
