@@ -62,7 +62,7 @@ class UserMessageHandler:
     def register_user(self, update: Update) -> None:
         send_str = "Вы поделились своим контактом. Информация которую мы узнали: " + update.message.contact.to_json()
         update.message.reply_text(send_str)
-        if self.backend_requester.register(update.message.contact):
+        if self.backend_requester.register_user(update.message.from_user):
             update.message.reply_text(text="Вы были успешно зарегистрированы!")
         else:
             update.message.reply_text(text="Что-то пошло не так, обратитесь к администраторам проекта, чтобы они "
