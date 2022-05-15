@@ -1,13 +1,13 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from telegram import Update
 from telegram.bot import Bot
-from backend_requester import BackendRequester
+from backend_service import BackendRequester
 from message_handler import UserMessageHandler
 
 
 class TrashFinderBot:
     def __init__(self, bot_token) -> None:
-        self.backend_requester = BackendRequester(url="http://localhost:5094")
+        self.backend_requester = BackendRequester()
         self.message_handler = UserMessageHandler(self.backend_requester)
 
         # Установка данных бота

@@ -3,10 +3,10 @@ import base64
 import requests
 import json
 from telegram import File, User, Contact
-import response_service
+import data_service
 
 
-class BackendRequester:
+class BackendService:
     def __init__(self, url: str):
         self.url = url
         # Отключил пока не разберусь с SSL
@@ -15,12 +15,18 @@ class BackendRequester:
 
     # Зарегистрировать пользователя в базе
     def register_user(self, user: User) -> bool:
-        data = response_service.user_json(user)
+        data = data_service.user_json(user)
         print(data)
         try:
             response = requests.post(self.url + "/register", json=data,
                                      headers=self.headers, verify=self.verify)
+            print("Response: ")
             print(response.content)
+            print("Url:")
+            print(response.url)
+            print("Request")
+            print(response.request.body)
+
             if response.status_code == 200:
                 return True
             return False

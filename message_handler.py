@@ -1,11 +1,11 @@
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import CallbackContext
 
-from backend_requester import BackendRequester
+from backend_service import BackendService
 
 
 class UserMessageHandler:
-    def __init__(self, backend_requester: BackendRequester):
+    def __init__(self, backend_requester: BackendService):
         self.backend_requester = backend_requester
         self.registered_users = self.get_registered_users()
         self.path_to_save_file = "D:\\Programmin\\Python\\Telegram_Bots\\TrashFinder_Bot\\TempDeepLomeTelegramBotRepo-\\users_images\\"
