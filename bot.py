@@ -1,13 +1,13 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from telegram import Update
 from telegram.bot import Bot
-from backend_service import BackendRequester
+from backend_service import BackendService
 from message_handler import UserMessageHandler
 
 
 class TrashFinderBot:
     def __init__(self, bot_token) -> None:
-        self.backend_requester = BackendRequester()
+        self.backend_requester = BackendService("http://localhost:5094")
         self.message_handler = UserMessageHandler(self.backend_requester)
 
         # Установка данных бота
@@ -30,6 +30,7 @@ class TrashFinderBot:
         self.dispatcher.add_handler(CommandHandler("share_phone", self.on_share_phone))
         self.dispatcher.add_handler(CommandHandler("share_location", self.on_share_location))
         self.dispatcher.add_handler(CommandHandler("share_trash_info", self.get_trash_info))
+        self.dispatcher.add_handler(CommandHandler("new_event", self.on_new_event))
         self.dispatcher.add_handler(MessageHandler(Filters.location, self.get_user_location))
         self.dispatcher.add_handler(MessageHandler(Filters.contact, self.contact))
         self.dispatcher.add_handler(MessageHandler(Filters.photo, self.photo))
@@ -63,6 +64,9 @@ class TrashFinderBot:
     def on_share_phone(self, update: Update, context: CallbackContext) -> None:
         self.message_handler.share_phone(update)
 
+    def on_new_event(self, update: Update, context: CallbackContext) -> None:
+        self.message_handler.new_event(update, context)
+
     # Когда к нам приходит сообщение в виде контакта
     def contact(self, update: Update, context: CallbackContext) -> None:
         self.message_handler.register_user(update)
@@ -83,4 +87,3 @@ class TrashFinderBot:
 
     def photo(self, update: Update, context: CallbackContext) -> None:
         self.message_handler.photo_in_message(update)
-

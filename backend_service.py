@@ -1,9 +1,9 @@
 import base64
-
 import requests
 import json
-from telegram import File, User, Contact
+from telegram import File, User, Contact, Location
 import data_service
+import EventCreationModel
 
 
 class BackendService:
@@ -12,6 +12,7 @@ class BackendService:
         # Отключил пока не разберусь с SSL
         self.verify = False
         self.headers = {'content-type': 'application/json'}
+        self.current_photo = None
 
     # Зарегистрировать пользователя в базе
     def register_user(self, user: User) -> bool:
@@ -20,13 +21,6 @@ class BackendService:
         try:
             response = requests.post(self.url + "/register", json=data,
                                      headers=self.headers, verify=self.verify)
-            print("Response: ")
-            print(response.content)
-            print("Url:")
-            print(response.url)
-            print("Request")
-            print(response.request.body)
-
             if response.status_code == 200:
                 return True
             return False
@@ -79,9 +73,10 @@ class BackendService:
         test = base64.b64encode(byte_array)
         new_str = test.decode('utf-8')
 
-        requests.post(self.url + "/try_in_photo", json=new_str)
+        return requests.post(self.url + "/try_in_photo", json=new_str)
 
     # Зарегистрировать евент в базе
-    def new_event(self, user_location: str):
+    def new_event(self, event_creation_model: EventCreationModel):
+        data_service.event_json(event_creation_model.user, event_creation_model.event_photo, event_creation_model.user_location)
         url_add_event = self.url + '/add_event'
         response = requests.post(url=url_add_event, json="")

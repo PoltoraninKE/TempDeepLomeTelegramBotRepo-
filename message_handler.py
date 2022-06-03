@@ -1,14 +1,17 @@
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import CallbackContext
 
+from EventCreationModel import EventCreationModel
 from backend_service import BackendService
 
-
 class UserMessageHandler:
+
+    current_event_model: EventCreationModel
+
     def __init__(self, backend_requester: BackendService):
         self.backend_requester = backend_requester
-        self.registered_users = self.get_registered_users()
-        self.path_to_save_file = "D:\\Programmin\\Python\\Telegram_Bots\\TrashFinder_Bot\\TempDeepLomeTelegramBotRepo-\\users_images\\"
+        #self.registered_users = self.get_registered_users()
+        self.path_to_save_file = "C:\\Users\\Kirul\\Desktop\\DeepLome\\TempDeepLomeTelegramBotRepo-\\users_images"
 
     # (/start)
     def start(self, update: Update) -> None:
@@ -88,31 +91,68 @@ class UserMessageHandler:
         user_chat_id = update.message.chat.id
         file = update.message.document
 
-        save_file_path = self.path_to_save_file + str(user_chat_id) + '_' + file.file_name + ".jpg"
+        save_file_path = self.path_to_save_file + str(user_chat_id) + '_' + file.file_name
 
         # Качаем файл на файловую шару
         obj = context.bot.get_file(file.file_id)
         obj.download(
             custom_path=save_file_path)
 
+        self.current_event_model = EventCreationModel()
+        self.current_event_model.user = update.message.from_user
+        self.current_event_model.event_photo = obj
+
+        # Тут проверка на то, что у нас находится на картинке
+        
+
+        my_keyboard = [
+
+            [KeyboardButton(text='Местоположение', request_location=True)]
+        ]
+        markup = ReplyKeyboardMarkup(keyboard=my_keyboard)
+        update.message.reply_text(text=
+                                  "Для создания ивента нам требуется ваше местоположение. Пожалуйста, поделитесь им :)",
+                                  reply_markup=markup)
+
         # Отправляем файл на бекенд, если нужный тип, иначе говорим, что что-то пошло не так.
         if file.mime_type == 'image/jpeg':
-            self.backend_requester.send_photo(obj)
+            # Check 4 good photo
+            response = self.backend_requester.send_photo(obj)
+            if response.status_code == 200:
+                my_keyboard = [
+
+                    [KeyboardButton(text='Местоположение', request_location=True)]
+                ]
+                markup = ReplyKeyboardMarkup(keyboard=my_keyboard)
+                update.message.reply_text(text=
+                                          "Для создания ивента нам требуется ваше местоположение. Пожалуйста, поделитесь им :)",
+                                          reply_markup=markup)
+
+            else:
+                update.message.reply_text(
+                    text="Произошла ошибка на сервере, пожалуйста обратитесь за помощью к администрации проекта.")
         else:
             update.message.reply_text(text="""
                         Данный тип фото не поддерживается, пожалуйста пришлите его в следующих форматах: 
                         - jpeg
                         """)
 
+
+
     def get_user_location(self, update: Update) -> None:
         user_location_json = update.message.location.to_json()
+        self.current_event_model.user_location = update.message.location
         send_str = "Вы поделились вашим местоположением: " + user_location_json
         update.message.reply_text(text=send_str)
-        self.backend_requester.new_event(user_location_json)
+        self.backend_requester.new_event(self.current_event_model.user, self.current_event_model.user_location, self.current_event_model.event_photo)
 
     def photo_in_message(self, update: Update) -> None:
         update.message.reply_text(text="Пожалуйста, пришлите не сжатое фото, мы не можем обработать сжатое :(")
 
-    #
     def get_registered_users(self) -> bytes:
         return self.backend_requester.get_registered_users()
+
+    def new_event(self, update: Update, context: CallbackContext) -> None:
+        update.message.reply_text(text="""Отлично, вы хотите зарегистрировать субботник! Поделитесь, пожалуйста 
+        фотографией, места, которое нужно убрать. Поставьте галочку "без сжатия", чтобы мы могли корректно обработать 
+        фотографию""")
