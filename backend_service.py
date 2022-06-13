@@ -1,37 +1,26 @@
 import base64
-
 import requests
-from telegram import Contact
 import json
-from telegram import File
+from telegram import File, User, Contact, Location
+import data_service
+import EventCreationModel
 
 
-class BackendRequester:
+class BackendService:
     def __init__(self, url: str):
         self.url = url
         # Отключил пока не разберусь с SSL
         self.verify = False
         self.headers = {'content-type': 'application/json'}
+        self.current_photo = None
 
     # Зарегистрировать пользователя в базе
-    def register(self, contact: Contact) -> bool:
-        print("Registering user")
-        data = {
-            "Id": 0,
-            "FirstName": contact.first_name,
-            "LastName": contact.last_name,
-            "UserId": contact.user_id,
-            "Phone": contact.phone_number,
-            "Events": [
-            ],
-            "Trashes": [
-            ]
-        }
+    def register_user(self, user: User) -> bool:
+        data = data_service.user_json(user)
         print(data)
         try:
-            response = requests.post(self.url + "/add_user", json=data,
+            response = requests.post(self.url + "/register", json=data,
                                      headers=self.headers, verify=self.verify)
-            print(response)
             if response.status_code == 200:
                 return True
             return False
@@ -84,9 +73,10 @@ class BackendRequester:
         test = base64.b64encode(byte_array)
         new_str = test.decode('utf-8')
 
-        requests.post(self.url + "/try_in_photo", json=new_str)
+        return requests.post(self.url + "/try_in_photo", json=new_str)
 
     # Зарегистрировать евент в базе
-    def new_event(self, user_location: str):
+    def new_event(self, event_creation_model: EventCreationModel):
+        data_service.event_json(event_creation_model.user, event_creation_model.event_photo, event_creation_model.user_location)
         url_add_event = self.url + '/add_event'
-        response = requests.post(url=url_add_event, json=)
+        response = requests.post(url=url_add_event, json="")
