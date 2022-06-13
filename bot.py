@@ -41,7 +41,7 @@ class TrashFinderBot:
         self.message_handler.registration(update)
 
     def healthcheck_API(self):
-        self.backend_requester.healthcheck()
+        self.backend_requester.health_check()
 
     # Команда "/start"
     def on_start(self, update: Update, context: CallbackContext) -> None:

@@ -25,19 +25,6 @@ def coordinates_to_address(coordinate):
     except Exception as exp:
         return "Wrong message, try different"
 
-# Получение локации пользователя
-def location(update, context):
-    message = update.message
-    position = (message.location.longitude, message.location.latitude)
-    coordinate = f"{position[0],},{position[1]}"
-    #  Пробуем отправить координаты, присланные пользователем
-    address_string = coordinates_to_address(coordinate)
-    update.message.reply_text(address_string)
-
-
-    dispatcher.add_handler(MessageHandler(Filters.location, location))
-
-
 
     # coordinate = update.message.text
     # address_string = coordinates_to_address(coordinate)
