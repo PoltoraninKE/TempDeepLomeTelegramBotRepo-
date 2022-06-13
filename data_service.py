@@ -8,12 +8,17 @@ import base64
 def event_json(location: Location, user: User, photo: File) -> str:
     photo_for_event_as_string = file_to_base64_string(photo)
     request_body = {
-        "user_id": user.id,
-        "user_location": {
-            "longitude": location.longitude,
-            "latitude": location.latitude
-        },
-        "photo": photo_for_event_as_string
+        "creatorId": user.id,
+        "eventName": "ONE TWO FREE",
+        "eventDescription": "ONE TO FORE",
+        "startDateTime": "",
+        "endDateTime": "",
+        "longitude": location.longitude,
+        "latitude": location.latitude,
+        "eventPhotos": {},
+        "usersAtEvents": {}
+        # TODO: Это делается отдельно, потому что
+        # "photo": photo_for_event_as_string
     }
     return request_body
 

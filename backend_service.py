@@ -68,15 +68,17 @@ class BackendService:
             print(ex)
         return response.content
 
-    def send_photo(self, file: File):
-        byte_array = file.download_as_bytearray()
-        test = base64.b64encode(byte_array)
-        new_str = test.decode('utf-8')
-
-        return requests.post(self.url + "/try_in_photo", json=new_str)
+    def send_photo(self, photo_of_trash: File):
+        data = data_service.file_to_base64_string(photo_of_trash)
+        return requests.post(self.url + "/try_in_photo", json=data)
 
     # Зарегистрировать евент в базе
     def new_event(self, event_creation_model: EventCreationModel):
-        data_service.event_json(event_creation_model.user, event_creation_model.event_photo, event_creation_model.user_location)
-        url_add_event = self.url + '/add_event'
-        response = requests.post(url=url_add_event, json="")
+        body = data_service.event_json(event_creation_model.user_location, event_creation_model.user, event_creation_model.event_photo)
+        print(body)
+        url_add_event = self.url + '/new_event'
+        response = requests.post(url=url_add_event, json=body)
+        if response.status_code == 200:
+            print("event registered")
+        else:
+            print(response.status_code)

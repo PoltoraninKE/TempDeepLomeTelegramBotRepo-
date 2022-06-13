@@ -102,33 +102,14 @@ class UserMessageHandler:
         self.current_event_model.user = update.message.from_user
         self.current_event_model.event_photo = obj
 
-        # Тут проверка на то, что у нас находится на картинке
-        
-
-        my_keyboard = [
-
-            [KeyboardButton(text='Местоположение', request_location=True)]
-        ]
-        markup = ReplyKeyboardMarkup(keyboard=my_keyboard)
-        update.message.reply_text(text=
-                                  "Для создания ивента нам требуется ваше местоположение. Пожалуйста, поделитесь им :)",
-                                  reply_markup=markup)
-
         # Отправляем файл на бекенд, если нужный тип, иначе говорим, что что-то пошло не так.
         if file.mime_type == 'image/jpeg':
             # Check 4 good photo
             response = self.backend_requester.send_photo(obj)
             if response.status_code == 200:
-                my_keyboard = [
-
-                    [KeyboardButton(text='Местоположение', request_location=True)]
-                ]
-                markup = ReplyKeyboardMarkup(keyboard=my_keyboard)
-                update.message.reply_text(text=
-                                          "Для создания ивента нам требуется ваше местоположение. Пожалуйста, поделитесь им :)",
-                                          reply_markup=markup)
-
+                self.share_location(update)
             else:
+                print(response.raw)
                 update.message.reply_text(
                     text="Произошла ошибка на сервере, пожалуйста обратитесь за помощью к администрации проекта.")
         else:
@@ -144,7 +125,13 @@ class UserMessageHandler:
         self.current_event_model.user_location = update.message.location
         send_str = "Вы поделились вашим местоположением: " + user_location_json
         update.message.reply_text(text=send_str)
-        self.backend_requester.new_event(self.current_event_model.user, self.current_event_model.user_location, self.current_event_model.event_photo)
+        print("User: ")
+        print(self.current_event_model.user)
+        print("Photo: ")
+        print(self.current_event_model.event_photo)
+        print("Location: ")
+        print(self.current_event_model.user_location)
+        self.backend_requester.new_event(self.current_event_model)
 
     def photo_in_message(self, update: Update) -> None:
         update.message.reply_text(text="Пожалуйста, пришлите не сжатое фото, мы не можем обработать сжатое :(")
