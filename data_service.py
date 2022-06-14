@@ -11,14 +11,11 @@ def event_json(location: Location, user: User, photo: File) -> str:
         "creatorId": user.id,
         "eventName": "ONE TWO FREE",
         "eventDescription": "ONE TO FORE",
-        "startDateTime": "",
-        "endDateTime": "",
+        "startDateTime": "2012-04-23T18:25:43.511Z",
+        "endDateTime": "2012-04-23T18:25:43.511Z",
         "longitude": location.longitude,
         "latitude": location.latitude,
-        "eventPhotos": {},
-        "usersAtEvents": {}
-        # TODO: Это делается отдельно, потому что
-        # "photo": photo_for_event_as_string
+        "photo": photo_for_event_as_string
     }
     return request_body
 
@@ -30,7 +27,7 @@ def user_json(user: User):
     print(user.get_profile_photos().photos[-1])
     user_profile_photo_as_string = file_to_base64_string(user.get_profile_photos().photos[-1][-1].get_file())
     request_body = {
-        "id": user.id,
+        "userTelegramId": user.id,
         "firstName": user.first_name,
         "lastName": user.last_name,
         "userName": user.name,
