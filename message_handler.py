@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext
 
 from EventCreationModel import EventCreationModel
 from backend_service import BackendService
+import resources as res
 
 class UserMessageHandler:
 
@@ -15,27 +16,14 @@ class UserMessageHandler:
 
     # (/start)
     def start(self, update: Update) -> None:
-        update.message.reply_text("""
-            Приветствую! Меня зовут TrashFinder_Bot, я готов стать вашим путеводителем по нашей экологической карте.
-- Для того, чтобы зарегистрироваться в системе введите команду - /register
-- Для создания нового ивента есть кнопки ниже
-- Для того, чтобы понять что вообще тут происходит введите команду /help
-- Для просмотра, что у нас есть на карте перейдите по ссылке или скачайте мобильное приложение.
-            """)
+        update.message.reply_text(res.START_TEXT)
 
     # (/help)
     def help_info(self, update: Update) -> None:
-        update.message.reply_text("""
-Мы - команда, которая разрабатывает карту и ЭКОсистему вокруг её.
-С помощью данного бота, вы можете:
-- Создавать информацию о мусорках на карте.
-- Создавать информацию о мусоре на карте.
-- Создавать собственные ивенты по уборке мусора.
-Карта мусорок, мусора и ивентов находится по ссылке - *ссылка*
-Если вы администратор, то ссылка на наше мобильное приложение - *ссылка, в которой скачивание дистрибутива*
-            """)
+        update.message.reply_text(res.HELP_COMMAND_TEXT)
 
     # (/registration)
+    # TODO Вынести строки в отдельный ресурсный файл
     def registration(self, update: Update) -> None:
         update.message.reply_text("""
         Мы используем только ту информацию, которую можем вытащить из вашего телеграма, не более.
@@ -118,8 +106,6 @@ class UserMessageHandler:
                         - jpeg
                         """)
 
-
-
     def get_user_location(self, update: Update) -> None:
         user_location_json = update.message.location.to_json()
         self.current_event_model.user_location = update.message.location
@@ -143,3 +129,11 @@ class UserMessageHandler:
         update.message.reply_text(text="""Отлично, вы хотите зарегистрировать субботник! Поделитесь, пожалуйста 
         фотографией, места, которое нужно убрать. Поставьте галочку "без сжатия", чтобы мы могли корректно обработать 
         фотографию""")
+
+    # Здесь нужно:
+    #   1. Проверить зарегистрирован ли пользователь
+    #   2. Показать список ивентов, которые есть
+    #   3. При нажатии зарегистрировать пользователя в этот ивент
+    #   *. Полистать список (ВОЗМОЖНО)
+    def join_to_event(self, update: Update, context: CallbackContext) -> None:
+        self.backend_requester.is_user_registered(update.message.from_user.id)

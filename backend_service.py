@@ -1,4 +1,3 @@
-import base64
 import requests
 import json
 from telegram import File, User, Contact, Location
@@ -34,7 +33,7 @@ class BackendService:
         byte_str = str(picture_in_bytes).replace('bytearray(b', '')
         str1 = bytes(picture_in_bytes)
         print(str1)
-        picture_as_str = str1.decode()  # .replace("'", '"')[1, -1]
+        picture_as_str = str1.decode()
         print(picture_as_str)
         data = {
             "Id": None,
@@ -82,3 +81,8 @@ class BackendService:
             print("event registered")
         else:
             print(response.status_code)
+
+    def is_user_registered(self, user_id: int) -> bool:
+        user_id_param = { 'userId': user_id }
+        response = requests.get(url=self.url + '/get_by_id/', params=user_id_param)
+        print(response.content)
