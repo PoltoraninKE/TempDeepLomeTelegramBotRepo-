@@ -12,6 +12,7 @@ class TrashFinderBot:
 
         # Установка данных бота
         self.bot = Bot(token=bot_token)
+        # TODO Вынести токен в отдельный ресурсный файл
         self.updater = Updater("2006392416:AAHd2COx0-ItWQkmvGRavUzOHTTWhytqiVQ", use_context=True)
         self.dispatcher = self.updater.dispatcher
 
@@ -24,6 +25,7 @@ class TrashFinderBot:
         self.updater.idle()
 
     def register_handlers(self) -> None:
+        # TODO Вынести строки в отдельный ресурсный файл
         self.dispatcher.add_handler(CommandHandler("start", self.on_start))
         self.dispatcher.add_handler(CommandHandler("register", self.on_register))
         self.dispatcher.add_handler(CommandHandler("help", self.on_help))
@@ -31,6 +33,7 @@ class TrashFinderBot:
         self.dispatcher.add_handler(CommandHandler("share_location", self.on_share_location))
         self.dispatcher.add_handler(CommandHandler("share_trash_info", self.get_trash_info))
         self.dispatcher.add_handler(CommandHandler("new_event", self.on_new_event))
+        self.dispatcher.add_handler(CommandHandler("join_to_event", self.on_join_to_event))
         self.dispatcher.add_handler(MessageHandler(Filters.location, self.get_user_location))
         self.dispatcher.add_handler(MessageHandler(Filters.contact, self.contact))
         self.dispatcher.add_handler(MessageHandler(Filters.photo, self.photo))
@@ -67,6 +70,9 @@ class TrashFinderBot:
     def on_new_event(self, update: Update, context: CallbackContext) -> None:
         self.message_handler.new_event(update, context)
 
+    def on_join_to_event(self, update: Update, context: CallbackContext) -> None:
+        self.message_handler.join_to_event(update, context)
+
     # Когда к нам приходит сообщение в виде контакта
     def contact(self, update: Update, context: CallbackContext) -> None:
         self.message_handler.register_user(update)
@@ -87,3 +93,4 @@ class TrashFinderBot:
 
     def photo(self, update: Update, context: CallbackContext) -> None:
         self.message_handler.photo_in_message(update)
+

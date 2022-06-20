@@ -1,4 +1,3 @@
-import base64
 import requests
 import json
 from telegram import File, User, Contact, Location
@@ -34,7 +33,7 @@ class BackendService:
         byte_str = str(picture_in_bytes).replace('bytearray(b', '')
         str1 = bytes(picture_in_bytes)
         print(str1)
-        picture_as_str = str1.decode()  # .replace("'", '"')[1, -1]
+        picture_as_str = str1.decode()
         print(picture_as_str)
         data = {
             "Id": None,
@@ -68,15 +67,22 @@ class BackendService:
             print(ex)
         return response.content
 
-    def send_photo(self, file: File):
-        byte_array = file.download_as_bytearray()
-        test = base64.b64encode(byte_array)
-        new_str = test.decode('utf-8')
-
-        return requests.post(self.url + "/try_in_photo", json=new_str)
+    def send_photo(self, photo_of_trash: File):
+        data = data_service.file_to_base64_string(photo_of_trash)
+        return requests.post(self.url + "/try_in_photo", json=data)
 
     # Зарегистрировать евент в базе
     def new_event(self, event_creation_model: EventCreationModel):
-        data_service.event_json(event_creation_model.user, event_creation_model.event_photo, event_creation_model.user_location)
-        url_add_event = self.url + '/add_event'
-        response = requests.post(url=url_add_event, json="")
+        body = data_service.event_json(event_creation_model.user_location, event_creation_model.user, event_creation_model.event_photo)
+        print(body)
+        url_add_event = self.url + '/new_event'
+        response = requests.post(url=url_add_event, json=body)
+        if response.status_code == 200:
+            print("event registered")
+        else:
+            print(response.status_code)
+
+    def is_user_registered(self, user_id: int) -> bool:
+        user_id_param = { 'userId': user_id }
+        response = requests.get(url=self.url + '/get_by_id/', params=user_id_param)
+        print(response.content)

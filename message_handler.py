@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext
 
 from EventCreationModel import EventCreationModel
 from backend_service import BackendService
+import resources as res
 
 class UserMessageHandler:
 
@@ -15,6 +16,7 @@ class UserMessageHandler:
 
     # (/start)
     def start(self, update: Update) -> None:
+<<<<<<< HEAD
         update.message.reply_text("""
             Приветствую! Меня зовут TrashFinder_Bot, я готов стать вашим путеводителем по нашей экологической карте.
 - Для того, чтобы зарегистрироваться в системе введите команду - /register
@@ -22,20 +24,16 @@ class UserMessageHandler:
 - Для того, чтобы понять что вообще тут происходит введите команду /help
 - Для просмотра, что у нас есть на карте перейдите скачайте мобильное приложение или посмотрите на нашем сайте.
             """)
+=======
+        update.message.reply_text(res.START_TEXT)
+>>>>>>> bf352a4a939490b3585c2c826dbef11c11b2aa9e
 
     # (/help)
     def help_info(self, update: Update) -> None:
-        update.message.reply_text("""
-Мы - команда, которая разрабатывает карту и ЭКОсистему вокруг её.
-С помощью данного бота, вы можете:
-- Создавать информацию о мусорках на карте.
-- Создавать информацию о мусоре на карте.
-- Создавать собственные ивенты по уборке мусора.
-Карта мусорок, мусора и ивентов находится по ссылке - *ссылка*
-Если вы администратор, то ссылка на наше мобильное приложение - *ссылка, в которой скачивание дистрибутива*
-            """)
+        update.message.reply_text(res.HELP_COMMAND_TEXT)
 
     # (/registration)
+    # TODO Вынести строки в отдельный ресурсный файл
     def registration(self, update: Update) -> None:
         update.message.reply_text("""
         Мы используем только ту информацию, которую можем вытащить из вашего телеграма, не более.
@@ -103,6 +101,7 @@ class UserMessageHandler:
         self.current_event_model.user = update.message.from_user
         self.current_event_model.event_photo = obj
 
+<<<<<<< HEAD
         # Тут проверка на то, что у нас находится на картинке
         update.message.reply_text("Ищем мусор на фотографии, пожалуйста подождите")
 
@@ -115,21 +114,16 @@ class UserMessageHandler:
                                   "Для создания ивента нам требуется ваше местоположение. Пожалуйста, поделитесь им :)",
                                   reply_markup=markup)
 
+=======
+>>>>>>> bf352a4a939490b3585c2c826dbef11c11b2aa9e
         # Отправляем файл на бекенд, если нужный тип, иначе говорим, что что-то пошло не так.
         if file.mime_type == 'image/jpeg':
             # Check 4 good photo
             response = self.backend_requester.send_photo(obj)
             if response.status_code == 200:
-                my_keyboard = [
-
-                    [KeyboardButton(text='Местоположение', request_location=True)]
-                ]
-                markup = ReplyKeyboardMarkup(keyboard=my_keyboard)
-                update.message.reply_text(text=
-                                          "Для создания ивента нам требуется ваше местоположение. Пожалуйста, поделитесь им :)",
-                                          reply_markup=markup)
-
+                self.share_location(update)
             else:
+                print(response.raw)
                 update.message.reply_text(
                     text="Произошла ошибка на сервере, пожалуйста обратитесь за помощью к администрации проекта.")
         else:
@@ -138,16 +132,24 @@ class UserMessageHandler:
                         - jpeg
                         """)
 
-
-
     def get_user_location(self, update: Update) -> None:
         user_location_json = update.message.location.to_json()
         self.current_event_model.user_location = update.message.location
         send_str = "Вы поделились вашим местоположением: " + user_location_json
         update.message.reply_text(text=send_str)
+<<<<<<< HEAD
         update.message.reply_text(
             "Субботник зарегистрирован! Спасибо, что помогаете сделать этот мир чуточку лучше.")
         self.backend_requester.new_event(self.current_event_model.user, self.current_event_model.user_location, self.current_event_model.event_photo)
+=======
+        print("User: ")
+        print(self.current_event_model.user)
+        print("Photo: ")
+        print(self.current_event_model.event_photo)
+        print("Location: ")
+        print(self.current_event_model.user_location)
+        self.backend_requester.new_event(self.current_event_model)
+>>>>>>> bf352a4a939490b3585c2c826dbef11c11b2aa9e
 
 
     def photo_in_message(self, update: Update) -> None:
@@ -157,6 +159,20 @@ class UserMessageHandler:
         return self.backend_requester.get_registered_users()
 
     def new_event(self, update: Update, context: CallbackContext) -> None:
+<<<<<<< HEAD
         update.message.reply_text(text=
                                   """Отлично, вы хотите зарегистрировать субботник! Поделитесь, пожалуйста фотографией, места, которое нужно убрать.
 Поставьте галочку "без сжатия", чтобы мы могли корректно обработать фотографию""")
+=======
+        update.message.reply_text(text="""Отлично, вы хотите зарегистрировать субботник! Поделитесь, пожалуйста 
+        фотографией, места, которое нужно убрать. Поставьте галочку "без сжатия", чтобы мы могли корректно обработать 
+        фотографию""")
+
+    # Здесь нужно:
+    #   1. Проверить зарегистрирован ли пользователь
+    #   2. Показать список ивентов, которые есть
+    #   3. При нажатии зарегистрировать пользователя в этот ивент
+    #   *. Полистать список (ВОЗМОЖНО)
+    def join_to_event(self, update: Update, context: CallbackContext) -> None:
+        self.backend_requester.is_user_registered(update.message.from_user.id)
+>>>>>>> bf352a4a939490b3585c2c826dbef11c11b2aa9e
