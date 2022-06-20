@@ -18,9 +18,9 @@ class UserMessageHandler:
         update.message.reply_text("""
             Приветствую! Меня зовут TrashFinder_Bot, я готов стать вашим путеводителем по нашей экологической карте.
 - Для того, чтобы зарегистрироваться в системе введите команду - /register
-- Для создания нового ивента есть кнопки ниже
+- Для создания нового ивента введите команду - /new_event
 - Для того, чтобы понять что вообще тут происходит введите команду /help
-- Для просмотра, что у нас есть на карте перейдите по ссылке или скачайте мобильное приложение.
+- Для просмотра, что у нас есть на карте перейдите скачайте мобильное приложение или посмотрите на нашем сайте.
             """)
 
     # (/help)
@@ -65,6 +65,7 @@ class UserMessageHandler:
     def register_user(self, update: Update) -> None:
         send_str = "Вы поделились своим контактом. Информация которую мы узнали: " + update.message.contact.to_json()
         update.message.reply_text(send_str)
+
         if self.backend_requester.register_user(update.message.from_user):
             update.message.reply_text(text="Вы были успешно зарегистрированы!")
         else:
@@ -103,7 +104,7 @@ class UserMessageHandler:
         self.current_event_model.event_photo = obj
 
         # Тут проверка на то, что у нас находится на картинке
-        
+        update.message.reply_text("Ищем мусор на фотографии, пожалуйста подождите")
 
         my_keyboard = [
 
@@ -144,7 +145,10 @@ class UserMessageHandler:
         self.current_event_model.user_location = update.message.location
         send_str = "Вы поделились вашим местоположением: " + user_location_json
         update.message.reply_text(text=send_str)
+        update.message.reply_text(
+            "Субботник зарегистрирован! Спасибо, что помогаете сделать этот мир чуточку лучше.")
         self.backend_requester.new_event(self.current_event_model.user, self.current_event_model.user_location, self.current_event_model.event_photo)
+
 
     def photo_in_message(self, update: Update) -> None:
         update.message.reply_text(text="Пожалуйста, пришлите не сжатое фото, мы не можем обработать сжатое :(")
@@ -153,6 +157,6 @@ class UserMessageHandler:
         return self.backend_requester.get_registered_users()
 
     def new_event(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_text(text="""Отлично, вы хотите зарегистрировать субботник! Поделитесь, пожалуйста 
-        фотографией, места, которое нужно убрать. Поставьте галочку "без сжатия", чтобы мы могли корректно обработать 
-        фотографию""")
+        update.message.reply_text(text=
+                                  """Отлично, вы хотите зарегистрировать субботник! Поделитесь, пожалуйста фотографией, места, которое нужно убрать.
+Поставьте галочку "без сжатия", чтобы мы могли корректно обработать фотографию""")
